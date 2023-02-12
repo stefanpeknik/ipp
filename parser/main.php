@@ -5,11 +5,11 @@ if ($argc > 2) {
     exit(10);
 }
 // checks if the argument is --help
-if ($argc == 2 && $argv[1] == '--help') {
-    echo("print help");
+if ($argc == 2) {
+    if ($argv[1] == '--help') {
+        echo("print help");
+    }
+    else {
+        exit(10);
+    }    
 }
-else {
-    exit(10);
-}
-
-

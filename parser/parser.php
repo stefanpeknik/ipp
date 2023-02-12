@@ -1,5 +1,6 @@
 <?php
 
+
 function my_is_int($input) {
     if ($input[0] == '-') {
         return ctype_digit(substr($input, 1));
@@ -56,3 +57,21 @@ class Constant {
         return $this->const;
     }
 }
+
+// checks if the number of arguments is correct
+if ($argc > 2) {
+    exit(10);
+}
+// checks if the argument is --help
+if ($argc == 2) {
+    if ($argv[1] == '--help') {
+        echo("print help");
+    }
+    else {
+        exit(10);
+    }    
+}
+
+$const = new Constant('int', '123');
+echo $const->getType();
+echo $const->getConst();
