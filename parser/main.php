@@ -33,7 +33,7 @@ function LocateHeader() {
         if(IsWholeLineComment($line) || IsWholeLineEmpty($line)) {
             continue;
         }
-        if (preg_match($head, $line)) {
+        if (preg_match($headReg, $line)) {
             $head = trim($line);
             return $head;
         }

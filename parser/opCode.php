@@ -1,15 +1,14 @@
 <?php
 
+enum ArgType {
+    const NONE = 0;
+    const VAR = 1;
+    const SYMB = 2;
+    const LABEL = 3;
+    const TYPE = 4;
+}
+
 class OpCode {
-
-    class Arg {
-        const NONE = 0;
-        const VAR = 1;
-        const SYMB = 2;
-        const LABEL = 3;
-        const TYPE = 4;
-    }
-
     private $OpCodes = array (
         'MOVE',
         'CREATEFRAME',
