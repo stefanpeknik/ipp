@@ -44,4 +44,12 @@ class Constant {
     public function getConst() {
         return $this->const;
     }
+
+    public function getType() {
+        return $this->type;
+    }
+
+    public function getValue() {
+        return $this->value;
+    }
 }

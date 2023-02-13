@@ -17,7 +17,7 @@ class Instruction {
         }
 
         for($i = 0; $i < count($args); $i++) {
-            if ($this->opcode->getArgs()[$i] == Arg::VAR) {
+            if ($this->opcode->getArgs()[$i] == ArgType::VAR) {
                 if (Variable::IsVar($args[$i])) {
                     $this->args[] = new Variable($args[$i]);
                 }
@@ -25,7 +25,7 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == Arg::SYMB) {
+            elseif ($this->opcode->getArgs()[$i] == ArgType::SYMB) {
                 if (Symbol::IsSymbol($args[$i])) {
                     $this->args[] = new Symbol($args[$i]);
                 }
@@ -33,7 +33,7 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == Arg::LABEL) {
+            elseif ($this->opcode->getArgs()[$i] == ArgType::LABEL) {
                 if (Label::IsLabel($args[$i])) {
                     $this->args[] = new Label($args[$i]);
                 }
@@ -41,7 +41,7 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == Arg::TYPE) {
+            elseif ($this->opcode->getArgs()[$i] == ArgType::TYPE) {
                 if (Type::IsType($args[$i])) {
                     $this->args[] = new Type($args[$i]);
                 }
@@ -49,7 +49,7 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == Arg::NONE) {
+            elseif ($this->opcode->getArgs()[$i] == ArgType::NONE) {
                 if ($args[$i] == null) {
                     $this->args[] = null;
                 }
