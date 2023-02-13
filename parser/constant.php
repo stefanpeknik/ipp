@@ -1,57 +1,46 @@
 <?php
 
-function my_is_int($input) {
-    if ($input[0] == '-') {
-        return ctype_digit(substr($input, 1));
-    }
-    return ctype_digit($input);
-}
-
 class Constant {
-    private $type;
     private $const;
+    private $type;
+    private $value;
 
-    private $Types = array (
-        'int',
-        'bool',
-        'string',
-        'nil'
-    );
-
-    public function __construct($type, $const) {
-        if (!in_array($type, $this->Types)) {
-            exit(69);
+    public function __construct($const) {
+        if (!self::IsConst($const)) {
+            exit(23);
         }
-        $this->type = $type;
-        
-        // switch($this->type) {
-        //     case 'int':
-        //         if (!my_is_int($const)) {
-        //             exit(69);
-        //         }
-        //         break;
-        //     case 'bool':
-        //         if (!is_bool($const)) {
-        //             exit(69);
-        //         }
-        //         break;
-        //     case 'string':
-        //         if (!is_string($const)) {
-        //             exit(69);
-        //         }
-        //         break;
-        //     case 'nil':
-        //         if (!is_null($const)) {
-        //             exit(69);
-        //         }
-        //         break;
-        // }
         $this->const = $const;
+        $this->type = substr($const, 0, strpos($const, '@'));
+        $this->value = substr($const, strpos($const, '@') + 1);
     }
 
-    public function getType() {
-        return $this->type;
+    public static function IsConst($const) {
+        # regex to check if the constant is in format int@int
+        $int = "/int@[+-]?\d+/";
+        # regex to check if the constant is in format bool@(true|false)
+        $bool = "/bool@(true|false)/";
+        # regex to check if the constant is in format string@string
+        $string = "/string@(([^#\\@]+|\\[0-9]{3})*)/";
+        # regex to check if the constant is in format nil@nil
+        $nil = "/nil@nil/";
+
+        if (preg_match($int, $const)) {
+            return true;
+        }
+        elseif (preg_match($bool, $const)) {
+            return true;
+        }
+        elseif (preg_match($string, $const)) {
+            return true;
+        }
+        elseif (preg_match($nil, $const)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
+
     public function getConst() {
         return $this->const;
     }
