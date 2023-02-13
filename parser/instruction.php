@@ -49,16 +49,15 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == ArgType::NONE) {
-                if ($args[$i] == null) {
-                    $this->args[] = null;
-                }
-                else {
-                    exit(23);
-                }
-            }
         }
 
     }
 
+    public function getOpcode() {
+        return $this->opcode;
+    }
+
+    public function getArgs() {
+        return $this->args;
+    }
 }

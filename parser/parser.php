@@ -104,18 +104,17 @@ class Instruction {
                     exit(23);
                 }
             }
-            elseif ($this->opcode->getArgs()[$i] == ArgType::NONE) {
-                if ($args[$i] == null) {
-                    $this->args[] = null;
-                }
-                else {
-                    exit(23);
-                }
-            }
         }
 
     }
 
+    public function getOpcode() {
+        return $this->opcode;
+    }
+
+    public function getArgs() {
+        return $this->args;
+    }
 }
 class Label {
     private $label;
@@ -144,11 +143,25 @@ class Label {
 }
 StartCheck($argc, $argv);
 
-$header = LocateHeader();
+LocateHeader();
 
 $instructions = ParseInstructions();
 
-print_r($instructions);
+
+$xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><program language="IPPcode23"></program>');
+
+// TODO
+for($i = 0; $i < count($instructions); $i++) {
+    $instruction = $xml->addChild('instruction');
+    $instruction->addAttribute('order', $i + 1);
+    $instruction->addAttribute('opcode', $instructions[$i]->getOpcode()->getOpcode());
+    $args = $instructions[$i]->getArgs();
+    for($j = 0; $j < count($args); $j++) {
+        $arg = $instruction->addChild('arg' . ($j + 1), $args[$j]->getArg());
+        $arg->addAttribute('type', $args[$j]->getType());
+    }
+}
+
 
 function ParseInstructions() {
     $instructions = array();
@@ -225,7 +238,7 @@ function IsWholeLineEmpty($line) {
         return false;
     }
 }
-enum ArgType {
+class ArgType {
     const NONE = 0;
     const VAR = 1;
     const SYMB = 2;
@@ -234,7 +247,7 @@ enum ArgType {
 }
 
 class OpCode {
-    private $OpCodes = array (
+    private static $OpCodes = array (
         'MOVE',
         'CREATEFRAME',
         'PUSHFRAME',
@@ -283,115 +296,115 @@ class OpCode {
 
         switch($this->opCode) {
             case 'MOVE':
-                $this->args = array(Arg::VAR, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'CREATEFRAME':
-                $this->args = array(Arg::NONE);
+                $this->args = array(ArgType::NONE);
                 break;
             case 'PUSHFRAME':
-                $this->args = array(Arg::NONE);
+                $this->args = array(ArgType::NONE);
                 break;
             case 'POPFRAME':
-                $this->args = array(Arg::NONE);
+                $this->args = array(ArgType::NONE);
                 break;
             case 'DEFVAR':
-                $this->args = array(Arg::VAR);
+                $this->args = array(ArgType::VAR);
                 break;
             case 'CALL':
-                $this->args = array(Arg::LABEL);
+                $this->args = array(ArgType::LABEL);
                 break;
             case 'RETURN':
-                $this->args = array(Arg::NONE);
+                $this->args = array(ArgType::NONE);
                 break;
             case 'PUSHS':
-                $this->args = array(Arg::SYMB);
+                $this->args = array(ArgType::SYMB);
                 break;
             case 'POPS':
-                $this->args = array(Arg::VAR);
+                $this->args = array(ArgType::VAR);
                 break;
             case 'ADD':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'SUB':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'MUL':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'IDIV':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'LT':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'GT':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'EQ':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'AND':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'OR':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'NOT':
-                $this->args = array(Arg::VAR, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'INT2CHAR':
-                $this->args = array(Arg::VAR, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'STRI2INT':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'READ':
-                $this->args = array(Arg::VAR, Arg::TYPE);
+                $this->args = array(ArgType::VAR, ArgType::TYPE);
                 break;
             case 'WRITE':
-                $this->args = array(Arg::SYMB);
+                $this->args = array(ArgType::SYMB);
                 break;
             case 'CONCAT':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'STRLEN':
-                $this->args = array(Arg::VAR, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'GETCHAR':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'SETCHAR':
-                $this->args = array(Arg::VAR, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'TYPE':
-                $this->args = array(Arg::VAR, Arg::SYMB);
+                $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'LABEL':
-                $this->args = array(Arg::LABEL);
+                $this->args = array(ArgType::LABEL);
                 break;
             case 'JUMP':
-                $this->args = array(Arg::LABEL);
+                $this->args = array(ArgType::LABEL);
                 break;
             case 'JUMPIFEQ':
-                $this->args = array(Arg::LABEL, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::LABEL, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'JUMPIFNEQ':
-                $this->args = array(Arg::LABEL, Arg::SYMB, Arg::SYMB);
+                $this->args = array(ArgType::LABEL, ArgType::SYMB, ArgType::SYMB);
                 break;
             case 'EXIT':
-                $this->args = array(Arg::SYMB);
+                $this->args = array(ArgType::SYMB);
                 break;
             case 'DPRINT':
-                $this->args = array(Arg::SYMB);
+                $this->args = array(ArgType::SYMB);
                 break;
             case 'BREAK':
-                $this->args = array(Arg::NONE);
+                $this->args = array(ArgType::NONE);
                 break;
         }
     }
 
     public static function IsOpCode($opCode) {
-        if (in_array(strtoupper($opCode), $this->OpCodes)) {
+        if (in_array(strtoupper($opCode), self::$OpCodes)) {
             return true;
         }
         else {
@@ -409,21 +422,17 @@ class OpCode {
 }
 class Symbol {
     private $symbol;
-    private $isVar;
-    private $isConst;
 
     public function __construct($symbol) {
         if (!self::IsSymbol($symbol)) {
             exit(23);
         }
         if (Variable::IsVar($symbol)) {
-            $this->isVar = true;
+            $this->symbol = new Variable($symbol);
         }
         else {
-            $this->isVar = false;
-            $this->isConst = true;
+            $this->symbol = new Constant($symbol);
         }
-        $this->symbol = $symbol;
     }
 
     public static function IsSymbol($symbol) {
@@ -442,13 +451,6 @@ class Symbol {
         return $this->symbol;
     }
 
-    public function isVar() {
-        return $this->isVar;
-    }
-
-    public function isConst() {
-        return $this->isConst;
-    }
 }
 class Type {
     private $type;

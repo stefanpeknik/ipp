@@ -1,6 +1,6 @@
 <?php
 
-enum ArgType {
+class ArgType {
     const NONE = 0;
     const VAR = 1;
     const SYMB = 2;

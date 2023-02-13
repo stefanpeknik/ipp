@@ -2,21 +2,17 @@
 
 class Symbol {
     private $symbol;
-    private $isVar;
-    private $isConst;
 
     public function __construct($symbol) {
         if (!self::IsSymbol($symbol)) {
             exit(23);
         }
         if (Variable::IsVar($symbol)) {
-            $this->isVar = true;
+            $this->symbol = new Variable($symbol);
         }
         else {
-            $this->isVar = false;
-            $this->isConst = true;
+            $this->symbol = new Constant($symbol);
         }
-        $this->symbol = $symbol;
     }
 
     public static function IsSymbol($symbol) {
@@ -35,11 +31,4 @@ class Symbol {
         return $this->symbol;
     }
 
-    public function isVar() {
-        return $this->isVar;
-    }
-
-    public function isConst() {
-        return $this->isConst;
-    }
 }

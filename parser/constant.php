@@ -16,6 +16,7 @@ class Constant {
 
     public static function IsConst($const) {
         # regex to check if the constant is in format int@int
+        // TODO
         $int = "/int@[+-]?\d+/";
         # regex to check if the constant is in format bool@(true|false)
         $bool = "/bool@(true|false)/";

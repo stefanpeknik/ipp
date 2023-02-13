@@ -2,11 +2,24 @@
 
 StartCheck($argc, $argv);
 
-$header = LocateHeader();
+LocateHeader();
 
 $instructions = ParseInstructions();
 
-print_r($instructions);
+
+$xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><program language="IPPcode23"></program>');
+
+for($i = 0; $i < count($instructions); $i++) {
+    $instruction = $xml->addChild('instruction');
+    $instruction->addAttribute('order', $i + 1);
+    $instruction->addAttribute('opcode', $instructions[$i]->getOpcode()->getOpcode());
+    $args = $instructions[$i]->getArgs();
+    for($j = 0; $j < count($args); $j++) {
+        $arg = $instruction->addChild('arg' . ($j + 1), $args[$j]->getArg());
+        $arg->addAttribute('type', $args[$j]->getType());
+    }
+}
+
 
 function ParseInstructions() {
     $instructions = array();
