@@ -6,9 +6,6 @@ if [ -f "parse.php" ]; then
   rm parse.php
 fi
 
-if [ -f "../parse.php" ]; then
-  rm ../parse.php
-fi
 
 # Create an empty file to store the concatenated content
 echo "<?php" >parse.php
