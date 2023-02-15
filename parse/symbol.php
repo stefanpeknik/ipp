@@ -5,7 +5,7 @@ class Symbol {
 
     public function __construct($symbol) {
         if (!self::IsSymbol($symbol)) {
-            exit(23);
+            exit(ErrorCodes::LEXICAL_OR_SYNTAX_ERROR);
         }
         if (Variable::IsVar($symbol)) {
             $this->symbol = new Variable($symbol);

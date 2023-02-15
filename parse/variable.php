@@ -7,7 +7,7 @@ class Variable {
 
     public function __construct($var) {
         if (!self::IsVar($var)) {
-            exit(23);
+            exit(ErrorCodes::LEXICAL_OR_SYNTAX_ERROR);
         }
         $this->var = $var;
         $this->scope = substr($var, 0, 2);
@@ -16,7 +16,7 @@ class Variable {
 
     public static function IsVar($var) {
         # regex to check if the variable is in format GF|LF|TF@var
-        $reg = "/^(LF|TF|GF)@[a-zA-Z_\$&%*!?-][a-zA-Z0-9_\$&%*!?-]*$/";
+        $reg = '/^(LF|TF|GF)@[a-zA-Z_$&%*!?-][a-zA-Z0-9_$&%*!?-]*$/';
         if (preg_match($reg, $var)) {
             return true;
         }

@@ -5,14 +5,14 @@ class Label {
 
     public function __construct($label) {
         if (!self::IsLabel($label)) {
-            exit(23);
+            exit(ErrorCodes::LEXICAL_OR_SYNTAX_ERROR);
         }
         $this->label = $label;
     }
 
     public static function IsLabel($label) {
         # regex to check if the label is in format label
-        $reg = "/[a-zA-Z_\$&%*!?-][a-zA-Z0-9_\$&%*!?-]*/";
+        $reg = '/^[a-zA-Z_$&%*!?-][a-zA-Z0-9_$&%*!?-]*$/';
         if (preg_match($reg, $label)) {
             return true;
         }

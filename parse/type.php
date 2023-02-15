@@ -5,7 +5,7 @@ class Type {
 
     public function __construct($type) {
         if (!self::IsType($type)) {
-            exit(23);
+            exit(ErrorCodes::LEXICAL_OR_SYNTAX_ERROR);
         }
         $this->type = $type;
     }

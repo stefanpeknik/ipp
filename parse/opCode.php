@@ -1,11 +1,10 @@
 <?php
 
 class ArgType {
-    const NONE = 0;
-    const VAR = 1;
-    const SYMB = 2;
-    const LABEL = 3;
-    const TYPE = 4;
+    const VAR = 0;
+    const SYMB = 1;
+    const LABEL = 2;
+    const TYPE = 3;
 }
 
 class OpCode {
@@ -52,22 +51,22 @@ class OpCode {
 
     public function __construct($opCode) {
         if (!self::IsOpCode($opCode)) {
-            exit(22);
+            exit(ErrorCodes::OPCODE_ERROR);
         }
-        $this->opCode = $opCode;
+        $this->opCode = strtoupper($opCode);
 
         switch($this->opCode) {
             case 'MOVE':
                 $this->args = array(ArgType::VAR, ArgType::SYMB);
                 break;
             case 'CREATEFRAME':
-                $this->args = array(ArgType::NONE);
+                $this->args = array();
                 break;
             case 'PUSHFRAME':
-                $this->args = array(ArgType::NONE);
+                $this->args = array();
                 break;
             case 'POPFRAME':
-                $this->args = array(ArgType::NONE);
+                $this->args = array();
                 break;
             case 'DEFVAR':
                 $this->args = array(ArgType::VAR);
@@ -76,7 +75,7 @@ class OpCode {
                 $this->args = array(ArgType::LABEL);
                 break;
             case 'RETURN':
-                $this->args = array(ArgType::NONE);
+                $this->args = array();
                 break;
             case 'PUSHS':
                 $this->args = array(ArgType::SYMB);
@@ -160,7 +159,7 @@ class OpCode {
                 $this->args = array(ArgType::SYMB);
                 break;
             case 'BREAK':
-                $this->args = array(ArgType::NONE);
+                $this->args = array();
                 break;
         }
     }

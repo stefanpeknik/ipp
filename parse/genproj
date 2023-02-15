@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Check if the "parse.php" file exists
+if [ -f "parse.php" ]; then
+  # Delete the "parse.php" file if it exists
+  rm parse.php
+fi
+
+if [ -f "../parse.php" ]; then
+  rm ../parse.php
+fi
+
+# Create an empty file to store the concatenated content
+echo "<?php" >parse.php
+echo "" >>parse.php
+
+# Loop through all files in the current directory
+for file in *; do
+  # Check if the file is a regular file and not the "genproj" or "parse.php" file
+  if [ -f "$file" ] && [ "$file" != "genproj" ]; then
+    # Ignore the first line of each file and append the rest to the parse.php file
+    if [ -f "$file" ] && [ "$file" != "parse.php" ]; then
+      sed '1d' "$file" >>parse.php
+    fi
+  fi
+done
+
+cp parse.php ../parse.php

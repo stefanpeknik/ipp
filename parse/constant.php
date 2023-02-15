@@ -7,7 +7,7 @@ class Constant {
 
     public function __construct($const) {
         if (!self::IsConst($const)) {
-            exit(23);
+            exit(ErrorCodes::LEXICAL_OR_SYNTAX_ERROR);
         }
         $this->const = $const;
         $this->type = substr($const, 0, strpos($const, '@'));
@@ -15,15 +15,10 @@ class Constant {
     }
 
     public static function IsConst($const) {
-        # regex to check if the constant is in format int@int
-        // TODO
-        $int = "/int@[+-]?\d+/";
-        # regex to check if the constant is in format bool@(true|false)
-        $bool = "/bool@(true|false)/";
-        # regex to check if the constant is in format string@string
-        $string = "/string@(([^#\\@]+|\\[0-9]{3})*)/";
-        # regex to check if the constant is in format nil@nil
-        $nil = "/nil@nil/";
+        $int = '/^int@[+-]?(0x[0-9a-fA-F]+|0[0-7]*|[1-9][0-9]*)$/';
+        $bool = '/^bool@(true|false)$/';
+        $string = '/^string@((?![\s#"\\\\]).|\\\\[0-9]{3})*$/';
+        $nil = '/^nil@nil$/';
 
         if (preg_match($int, $const)) {
             return true;
