@@ -118,10 +118,10 @@ function StartCheck($argc, $argv) {
     // checks if the argument is --help
     if ($argc == 2) {
         if ($argv[1] == '--help') {
-            echo "Skript typu filtr (parse.php v jazyce PHP 8.1)\n";
-            echo "načte ze standardního vstupu zdrojový kód v IPPcode23,\n"; 
-            echo "zkontroluje lexikální a syntaktickou správnost kódu\n";
-            echo "a vypíše na standardní výstup XML reprezentaci programu\n";
+            echo "Použití: php parse.php [--help]\n\n";
+            echo "Tento skript bude pracovat s těmito parametry:\n\n";
+            echo "Volby:\n";
+            echo "  --help                 zobrazí tuto nápovědu a ukončí program\n";
             exit(0);
         }
         else {
