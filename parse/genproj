@@ -1,25 +1,23 @@
 #!/bin/bash
 
-# Check if the "parse.php" file exists
-if [ -f "parse.php" ]; then
-  # Delete the "parse.php" file if it exists
-  rm parse.php
+# Set the name of the output file
+output_file="parse.php"
+
+# Remove the output file if it already exists
+if [ -e "$output_file" ]; then
+    rm "$output_file"
 fi
 
-
-# Create an empty file to store the concatenated content
-echo "<?php" >parse.php
-echo "" >>parse.php
-
-# Loop through all files in the current directory
-for file in *; do
-  # Check if the file is a regular file and not the "genproj" or "parse.php" file
-  if [ -f "$file" ] && [ "$file" != "genproj" ]; then
-    # Ignore the first line of each file and append the rest to the parse.php file
-    if [ -f "$file" ] && [ "$file" != "parse.php" ]; then
-      sed '1d' "$file" >>parse.php
+# Loop through all PHP files in the current directory
+for file in *.php; do
+    # Skip the parse.php file
+    if [ "$file" = "parse.php" ]; then
+        continue
     fi
-  fi
-done
 
-cp parse.php ../parse.php
+    # Get the content of the file, skipping the first line
+    content=$(tail -n +2 "$file")
+
+    # Append the content to the output file
+    echo "$content" >> "$output_file"
+done

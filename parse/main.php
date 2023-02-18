@@ -118,10 +118,10 @@ function StartCheck($argc, $argv) {
     // checks if the argument is --help
     if ($argc == 2) {
         if ($argv[1] == '--help') {
-            echo "Použití: php parse.php [--help]\n\n";
-            echo "Tento skript bude pracovat s těmito parametry:\n\n";
-            echo "Volby:\n";
-            echo "  --help                 zobrazí tuto nápovědu a ukončí program\n";
+            echo "Usage: php parse.php [--help]\n\n";
+            echo "This script will work with the following parameters:\n\n";
+            echo "Options:\n";
+            echo "  --help                 display this help message and exit\n";
             exit(0);
         }
         else {
