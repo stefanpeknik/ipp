@@ -35,9 +35,10 @@ def parse_xml_file(filename):
         sys.exit(ERR_XML_FORMAT)
     root = tree.getroot()
     for child in root:
-        if child.tag not in ['instruction', 'arg']:
+        if child.tag != 'instruction':
             print(f"Error: Unexpected element '{child.tag}' found in XML file.", file=sys.stderr)
             sys.exit(ERR_XML_STRUCTURE)
+        
     return root
 
 def main():
