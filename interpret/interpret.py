@@ -24,32 +24,43 @@ def parse_arguments():
 
 
 def parse_xml_file(filename=sys.stdin):
+    if isinstance(filename, str):
+        with open(filename, "r") as file:
+            xml_data = file.read()
+    else:
+        xml_data = filename.read()
     try:
-        tree = ET.parse(filename)
+        tree = ET.ElementTree(ET.fromstring(xml_data))
     except ET.ParseError:
         print(
             f"Error: File '{filename}' is not well-formed XML.", file=sys.stderr)
         sys.exit(err.ERR_INVALID_XML_FORMAT)
     root = tree.getroot()
+    
     for instruc in root:
-        if instruc.tag != 'instruction':
-            print(
-                f"Error: Unexpected element '{instruc.tag}' found in XML file.", file=sys.stderr)
-            sys.exit(err.ERR_INVALID_XML_STRUCTURE)
-        for i in len(instruc.items()):
-            foundArg = False
-            for arg in instruc:
-                if arg.tag == 'arg' + i:
-                    foundArg = True
-                    break
-            if not foundArg:
-                print(
-                    f"Error: Wrongly indexed argument found in XML file under instruction {instruc.tag}.", file=sys.stderr)
-                sys.exit(err.ERR_INVALID_XML_STRUCTURE)
+        
+    
+    # for instruc in root:
+    #     if instruc.tag != 'instruction':
+    #         print(
+    #             f"Error: Unexpected element '{instruc.tag}' found in XML file.", file=sys.stderr)
+    #         sys.exit(err.ERR_INVALID_XML_STRUCTURE)
+    #     for i in len(instruc.items()):
+    #         foundArg = False
+    #         for arg in instruc:
+    #             if arg.tag == 'arg' + i:
+    #                 foundArg = True
+    #                 break
+    #         if not foundArg:
+    #             print(
+    #                 f"Error: Wrongly indexed argument found in XML file under instruction {instruc.tag}.", file=sys.stderr)
+    #             sys.exit(err.ERR_INVALID_XML_STRUCTURE)
     return root
+
 
 def Interprate(xml, read_from):
     pass
+
 
 def main():
     args = parse_arguments()
@@ -63,7 +74,7 @@ def main():
         read_from = args.input_file
     else:
         read_from = sys.stdin
-        
+
     Interprate(xml, read_from)
 
 
