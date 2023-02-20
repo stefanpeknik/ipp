@@ -1,6 +1,6 @@
 import argparse
 import sys
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 from interpret.errorCodes import ErrorCodes as err
 
@@ -23,39 +23,82 @@ def parse_arguments():
     return args
 
 
-def parse_xml_file(filename=sys.stdin):
+def validate_xml(xml_string):
+    # definice XSD schématu pro validaci
+    schema_string = '''<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <xs:element name="program">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="instruction" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                    <xs:attribute name="order" type="xs:int" use="required"/>
+                                    <xs:attribute name="opcode" type="xs:string" use="required"/>
+                                    <xs:attribute name="type" type="xs:string" use="optional"/>
+                                </xs:extension>
+                            </xs:simpleContent>
+                            <xs:element name="arg1" type="xs:string" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute name="type" type="xs:string" use="required"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="arg2" type="xs:string" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute name="type" type="xs:string" use="required"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="arg3" type="xs:string" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute name="type" type="xs:string" use="required"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="language" type="xs:string" use="required" />
+            </xs:complexType>
+        </xs:element>
+    </xs:schema>'''
+
+    # vytvoření objektu XML schématu
+    xmlschema_doc = etree.fromstring(schema_string.encode('utf-8'))
+    xmlschema = etree.XMLSchema(xmlschema_doc)
+
+    # vytvoření objektu XML dokumentu
+    try:
+        xml_doc = etree.fromstring(xml_string.encode('utf-8'))
+    except etree.XMLSyntaxError:
+        sys.exit(err.ERR_INVALID_XML_FORMAT)
+
+    # ověření validity XML dokumentu
+    if not xmlschema.validate(xml_doc):
+        sys.exit(err.ERR_INVALID_XML_STRUCTURE)
+
+    return xml_doc
+
+
+def parse_xml(filename=sys.stdin):
     if isinstance(filename, str):
         with open(filename, "r") as file:
-            xml_data = file.read()
+            xml_string = file.read()
     else:
-        xml_data = filename.read()
-    try:
-        tree = ET.ElementTree(ET.fromstring(xml_data))
-    except ET.ParseError:
-        print(
-            f"Error: File '{filename}' is not well-formed XML.", file=sys.stderr)
-        sys.exit(err.ERR_INVALID_XML_FORMAT)
-    root = tree.getroot()
-    
-    for instruc in root:
-        
-    
-    # for instruc in root:
-    #     if instruc.tag != 'instruction':
-    #         print(
-    #             f"Error: Unexpected element '{instruc.tag}' found in XML file.", file=sys.stderr)
-    #         sys.exit(err.ERR_INVALID_XML_STRUCTURE)
-    #     for i in len(instruc.items()):
-    #         foundArg = False
-    #         for arg in instruc:
-    #             if arg.tag == 'arg' + i:
-    #                 foundArg = True
-    #                 break
-    #         if not foundArg:
-    #             print(
-    #                 f"Error: Wrongly indexed argument found in XML file under instruction {instruc.tag}.", file=sys.stderr)
-    #             sys.exit(err.ERR_INVALID_XML_STRUCTURE)
-    return root
+        xml_string = filename.read()
+
+    xml_doc = validate_xml(xml_string)
+    return xml_doc
 
 
 def Interprate(xml, read_from):
