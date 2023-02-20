@@ -1,4 +1,5 @@
 <?php
+require_once 'errorCodes.php';
 
 class ArgType {
     const VAR = 0;

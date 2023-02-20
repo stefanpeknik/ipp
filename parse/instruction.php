@@ -1,4 +1,11 @@
 <?php
+require_once 'opCode.php';
+require_once 'variable.php';
+require_once 'symbol.php';
+require_once 'label.php';
+require_once 'type.php';
+require_once 'errorCodes.php';
+
 
 class Instruction {
     private $opcode;

@@ -1,4 +1,7 @@
 <?php
+require_once 'variable.php';
+require_once 'constant.php';
+require_once 'errorCodes.php';
 
 class Symbol {
     private $symbol;

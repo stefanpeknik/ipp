@@ -1,29 +1,14 @@
 <?php
-
-class ErrorCodes {
-    const HEADER_ERROR = 21;
-    const OPCODE_ERROR = 22;
-    const LEXICAL_OR_SYNTAX_ERROR = 23;
-}
+require_once 'errorCodes.php';
+require_once 'instruction.php';
 
 StartCheck($argc, $argv);
-
 LocateHeader();
-
 $instructions = ParseInstructions();
-
-
 $xml = GenerateXMLFromInstructions($instructions);
-
-// Open the stdout stream for writing
 $stdout = fopen('php://stdout', 'w');
-
-// Write the XML document to stdout
 fwrite($stdout, $xml);
-
-// Close the stdout stream
 fclose($stdout);
-
 
 function GenerateXMLFromInstructions($instructions) {
     $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><program language="IPPcode23"></program>');
