@@ -24,8 +24,6 @@ class Variable:
         self._value = value
         self._type = type
 
-    def IsDefined(self):
-        return self._value != None
 
     # def __add__(self, other):
     #     if self.type == DataType.INT and other.type == DataType.INT:

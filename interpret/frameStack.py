@@ -1,5 +1,8 @@
-# might use might not
-class LocalFrameStack:
+import sys
+import errorCodes as err
+
+
+class FrameStack:
     def __init__(self):
         self.stack = []
 
@@ -9,6 +12,7 @@ class LocalFrameStack:
     def pop(self):
         if not self.is_empty():
             return self.stack.pop()
+        sys.exit(err.ERR_FRAME_NOT_FOUND)
 
     def is_empty(self):
         return len(self.stack) == 0
