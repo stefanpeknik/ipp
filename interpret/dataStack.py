@@ -1,6 +1,6 @@
 import sys
 import errorCodes as err
-
+from exceptions import *
 
 class DataStack:
     def __init__(self):
@@ -12,7 +12,7 @@ class DataStack:
     def pop(self):
         if not self.is_empty():
             return self.stack.pop()
-        sys.exit(err.ERR_MISSING_VALUE)
+        raise MissingValueException("Data stack is empty.")
 
     def is_empty(self):
         return len(self.stack) == 0

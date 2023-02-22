@@ -5,6 +5,7 @@ from frameStack import FrameStack
 from callStack import CallStack
 from dataStack import DataStack
 from frame import Frame
+from exceptions import *
 from typing import List, Dict, Tuple
 
 
@@ -89,11 +90,11 @@ class Instruction:
         if TF.defined:
             return TF.getVar(name)
         else:
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            raise FrameNotFoundException("TF not found")
 
     def getVarFromLF(self, name, LF_stack) -> Variable:
         if LF_stack.is_empty() or not LF_stack.top().defined:
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            raise FrameNotFoundException("LF not found")
         else:
             return LF_stack.top().getVar(name)
 
@@ -104,11 +105,11 @@ class Instruction:
         if TF.defined:
             TF.getVar(name).set(type, value)
         else:
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            raise FrameNotFoundException("TF not found")
 
     def setVarInLF(self, name, LF_stack, type, value) -> None:
         if LF_stack.is_empty() or not LF_stack.top().defined:
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            raise FrameNotFoundException("LF not found")
         else:
             LF_stack.top().getVar(name).set(type, value)
 
@@ -121,8 +122,6 @@ class Instruction:
             self.setVarInTF(name, TF, type, value)
         elif scope == "LF":
             self.setVarInLF(name, LF_stack, type, value)
-        else:
-            sys.exit(err.ERR_INTERNAL)
         return GF, TF, LF_stack
 
     def defVar(self, arg, GF, TF, LF_stack) -> Tuple:
@@ -139,7 +138,7 @@ class Instruction:
         if self.isVar(self.args[1]):
             var = self.findVar(self.args[1], GF, TF, LF_stack)
             if not var.inited:
-                sys.exit(err.ERR_MISSING_VALUE)
+                raise MissingValueException("Variable not inited")
             value = var.value
             type = var.type
         else:
@@ -156,7 +155,7 @@ class Instruction:
 
     def _pushframe(self, ins_num: int, GF: Frame, TF: Frame, LF_stack: FrameStack, labels: Dict[str, int], call_stack: CallStack, data_stack: DataStack, read_from: str) -> Tuple:
         if not TF.defined:
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            raise FrameNotFoundException("TF not defined")
         LF_stack.push(TF)
         TF = Frame()
         TF.defined = False

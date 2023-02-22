@@ -1,6 +1,6 @@
 import sys
 import errorCodes as err
-
+from exceptions import *
 
 class FrameStack:
     def __init__(self):
@@ -12,7 +12,7 @@ class FrameStack:
     def pop(self):
         if not self.is_empty():
             return self.stack.pop()
-        sys.exit(err.ERR_FRAME_NOT_FOUND)
+        raise FrameNotFoundException("Frame stack is empty.")
 
     def is_empty(self):
         return len(self.stack) == 0

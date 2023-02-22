@@ -1,6 +1,7 @@
 from variable import Variable
 import sys
 import errorCodes as err
+from exceptions import *
 
 
 class Frame:
@@ -15,7 +16,7 @@ class Frame:
         try:
             return self.__locals[name]
         except:
-            sys.exit(err.ERR_VARIABLE_NOT_FOUND)
+            raise UndefinedVariableException("Variable {} is not defined.".format(name))
 
     def GetVarValue(self, name):
         return self.__locals[name].value
