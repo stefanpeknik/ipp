@@ -127,11 +127,14 @@ def parse_xml(filename=sys.stdin):
 
 def Interprate(instructions, read_from):
     GF = Frame()
+    GF.defined = True
     TF = Frame()
     LF_stack = FrameStack()
+    labels = {}
 
-    for ins in instructions:
-        GF, TF, LF_stack = ins.Execute(GF, TF, LF_stack, read_from)
+    for ins_num in range(len(instructions)):
+        ins_num, GF, TF, LF_stack, labels = instructions[ins_num].execute(
+            ins_num, GF, TF, LF_stack, labels, read_from)
 
 
 def main():

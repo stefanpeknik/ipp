@@ -4,8 +4,9 @@ from interpret.dataType import DataType
 
 class Variable:
 
-    def __init__(self, name: str):
+    def __init__(self, name):
         self._name = name
+        self._inited = False
 
     @property
     def name(self):
@@ -19,11 +20,14 @@ class Variable:
     def type(self):
         return self._type
 
-    @value.setter
-    def value(self, value, type: DataType):
-        self._value = value
-        self._type = type
+    @property
+    def inited(self):
+        return self._inited
 
+    def set(self, type, val):
+        self._type = type
+        self._value = val
+        self._inited = True
 
     # def __add__(self, other):
     #     if self.type == DataType.INT and other.type == DataType.INT:

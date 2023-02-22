@@ -17,7 +17,7 @@ class FrameStack:
     def is_empty(self):
         return len(self.stack) == 0
 
-    def peek(self):
+    def top(self):
         if not self.is_empty():
             return self.stack[-1]
 

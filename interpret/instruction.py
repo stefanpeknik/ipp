@@ -1,5 +1,6 @@
 import sys
 import errorCodes as err
+from frame import Frame
 
 
 class Instruction:
@@ -49,7 +50,7 @@ class Instruction:
     def args(self):
         return self._args
 
-    def execute(self, GF, TF, LF_stack, read_from):
+    def execute(self, ins_num, GF, TF, LF_stack, labels, read_from):
         return self._op[self._opcode](GF, TF, LF_stack, read_from)
 
     def isConstant(self, arg):
@@ -64,103 +65,188 @@ class Instruction:
     def isType(self, arg):
         return arg.type == "type"
 
-    def getVarScope(self, arg):
-        return arg.value.split("@")[0]
+    def getVarNameAndScope(self, arg):
+        return arg.value.split("@")
 
-    def _move(self, GF, TF, LF_stack, read_from):
-        if self.getVarScope(self.args[1]) == "GF":
-            pass
+    def findVar(self, arg, GF, TF, LF_stack):
+        scope, name = arg.value.split("@")
+        if scope == "GF":
+            return self.getVarFromGF(name, GF)
+        elif scope == "TF":
+            return self.getVarFromTF(name, TF)
+        elif scope == "LF":
+            return self.getVarFromLF(name, LF_stack)
+
+    def getVarFromGF(self, name, GF):
+        return GF.getVar(name)
+
+    def getVarFromTF(self, name, TF):
+        if TF.defined:
+            return TF.getVar(name)
+        else:
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+
+    def getVarFromLF(self, name, LF_stack):
+        if LF_stack.is_empty() or not LF_stack.top().defined:
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+        else:
+            return LF_stack.top().getVar(name)
+
+    def setVarInGF(self, name, GF, type, value):
+        GF.getVar(name).set(type, value)
+
+    def setVarInTF(self, name, TF, type, value):
+        if TF.defined:
+            TF.getVar(name).set(type, value)
+        else:
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+
+    def setVarInLF(self, name, LF_stack, type, value):
+        if LF_stack.is_empty() or not LF_stack.top().defined:
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+        else:
+            LF_stack.top().getVar(name).set(type, value)
+
+    def setVar(self, arg, GF, TF, LF_stack, type, value):
+        scope, name = self.getVarNameAndScope(
+            self._args[0])
+        if scope == "GF":
+            self.setVarInGF(name, GF, type, value)
+        elif scope == "TF":
+            self.setVarInTF(name, TF, type, value)
+        elif scope == "LF":
+            self.setVarInLF(name, LF_stack, type, value)
+        else:
+            sys.exit(err.ERR_INTERNAL)
         return GF, TF, LF_stack
 
-    def _createframe(self, GF, TF, LF_stack, read_from):
+    def defVar(self, arg, GF, TF, LF_stack):
+        scope, name = self.getVarNameAndScope(self.args[0])
+        if scope == "GF":
+            GF.addVar(name)
+        elif scope == "TF":
+            TF.addVar(name)
+        elif scope == "LF":
+            LF_stack.top().addVar(name)
         return GF, TF, LF_stack
 
-    def _pushframe(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _move(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        if self.isVar(self.args[1]):
+            var = self.findVar(self.args[1], GF, TF, LF_stack)
+            if not var.inited:
+                sys.exit(err.ERR_MISSING_VALUE)
+            value = var.value
+            type = var.type
+        else:
+            type, value = self.args[1].split('@')
 
-    def _popframe(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+        GF, TF, LF_stack = self.setVar(
+            self._args[0], GF, TF, LF_stack, type, value)
 
-    def _defvar(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _call(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _createframe(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        TF = Frame()
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _return(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _pushframe(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        if not TF.defined:
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+        LF_stack.push(TF)
+        TF = Frame()
+        TF.defined = False
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _pushs(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _popframe(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        TF = LF_stack.pop()
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _pops(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _defvar(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        try:
+            var = self.findVar(self.args[0], GF, TF, LF_stack)
+            sys.exit(err.ERR_SEMANTIC_ERROR)
+        except:
+            GF, TF, LF_stack = self.defVar(
+                self.args[0], GF, TF, LF_stack)
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _add(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _call(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _sub(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _return(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _mul(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _pushs(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _idiv(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _pops(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _lt(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _add(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _gt(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _sub(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _eq(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _mul(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _and(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _idiv(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _or(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _lt(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _not(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _gt(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _int2char(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _eq(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _stri2int(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _and(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _read(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _or(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _write(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _not(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _concat(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _int2char(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _getchar(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _stri2int(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _setchar(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _read(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _type(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _write(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _label(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _concat(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _jump(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _getchar(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _jumpifeq(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _setchar(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _jumpifneq(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _type(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
 
-    def _exit(self, GF, TF, LF_stack, read_from):
-        return GF, TF, LF_stack
+    def _label(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
+
+    def _jump(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
+
+    def _jumpifeq(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
+
+    def _jumpifneq(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
+
+    def _exit(self, ins_num, GF, TF, LF_stack, labels, read_from):
+        return ins_num, GF, TF, LF_stack, labels
