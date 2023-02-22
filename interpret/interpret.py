@@ -7,6 +7,8 @@ from instruction import Instruction
 from argument import Argument
 from frame import Frame
 from frameStack import FrameStack
+from callStack import CallStack
+from dataStack import DataStack
 
 
 def parse_arguments():
@@ -131,10 +133,12 @@ def Interprate(instructions, read_from):
     TF = Frame()
     LF_stack = FrameStack()
     labels = {}
+    call_stack = CallStack()
+    data_stack = DataStack()
 
     for ins_num in range(len(instructions)):
-        ins_num, GF, TF, LF_stack, labels = instructions[ins_num].execute(
-            ins_num, GF, TF, LF_stack, labels, read_from)
+        ins_num, GF, TF, LF_stack, labels, call_stack, data_stack = instructions[ins_num].execute(
+            ins_num, GF, TF, LF_stack, labels, call_stack, data_stack, read_from)
 
 
 def main():
