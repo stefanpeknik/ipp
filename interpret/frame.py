@@ -16,12 +16,19 @@ class Frame:
         try:
             return self.__locals[name]
         except:
-            raise UndefinedVariableException("Variable {} is not defined.".format(name))
+            raise UndefinedVariableException(
+                "Variable {} is not defined.".format(name))
 
     def GetVarValue(self, name):
+        if not self.__locals[name].inited:
+            raise MissingValueException(
+                "Variable {} is not initialized.".format(name))
         return self.__locals[name].value
 
     def GetVarType(self, name):
+        if not self.__locals[name].inited:
+            raise MissingValueException(
+                "Variable {} is not initialized.".format(name))
         return self.__locals[name].type
 
     @property
