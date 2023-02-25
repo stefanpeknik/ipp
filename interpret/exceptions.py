@@ -1,4 +1,4 @@
-class MissingParamException(Exception):
+class MissingParamException(Exception):  # 10
     def __init__(self, message):
         self.message = message
 
@@ -6,7 +6,7 @@ class MissingParamException(Exception):
         return self.message
 
 
-class InvalidXMLFormatException(Exception):
+class InvalidXMLFormatException(Exception):  # 31
     def __init__(self, message):
         self.message = message
 
@@ -14,7 +14,7 @@ class InvalidXMLFormatException(Exception):
         return self.message
 
 
-class InvalidXMLStructureException(Exception):
+class InvalidXMLStructureException(Exception):  # 32
     def __init__(self, message):
         self.message = message
 
@@ -22,7 +22,7 @@ class InvalidXMLStructureException(Exception):
         return self.message
 
 
-class SemanticException(Exception):
+class SemanticException(Exception):  # 52
     def __init__(self, message):
         self.message = message
 
@@ -30,7 +30,7 @@ class SemanticException(Exception):
         return self.message
 
 
-class OperandTypeException(Exception):
+class OperandTypeException(Exception):  # 53
     def __init__(self, message):
         self.message = message
 
@@ -38,7 +38,7 @@ class OperandTypeException(Exception):
         return self.message
 
 
-class UndefinedVariableException(Exception):
+class UndefinedVariableException(Exception):  # 54
     def __init__(self, message):
         self.message = message
 
@@ -46,7 +46,7 @@ class UndefinedVariableException(Exception):
         return self.message
 
 
-class FrameNotFoundException(Exception):
+class FrameNotFoundException(Exception):  # 55
     def __init__(self, message):
         self.message = message
 
@@ -54,7 +54,7 @@ class FrameNotFoundException(Exception):
         return self.message
 
 
-class MissingValueException(Exception):
+class MissingValueException(Exception):  # 56
     def __init__(self, message):
         self.message = message
 
@@ -62,7 +62,7 @@ class MissingValueException(Exception):
         return self.message
 
 
-class InvalidOperandValueException(Exception):
+class InvalidOperandValueException(Exception):  # 57
     def __init__(self, message):
         self.message = message
 
@@ -70,7 +70,7 @@ class InvalidOperandValueException(Exception):
         return self.message
 
 
-class StringErrorException(Exception):
+class StringErrorException(Exception):  # 58
     def __init__(self, message):
         self.message = message
 
@@ -78,7 +78,7 @@ class StringErrorException(Exception):
         return self.message
 
 
-class InternalErrorException(Exception):
+class InternalErrorException(Exception):  # 99
     def __init__(self, message):
         self.message = message
 

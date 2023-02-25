@@ -1,6 +1,7 @@
 import argparse
 import sys
 from lxml import etree
+import re
 
 from errorCodes import ErrorCodes as err
 from instruction import Instruction
@@ -52,7 +53,7 @@ def validate_xml(xml_string):
         <xs:element name="arg2" minOccurs="0" type="argType" />
         <xs:element name="arg3" minOccurs="0" type="argType" />
         </xs:sequence>
-        <xs:attribute name="order" type="xs:integer" use="required" />
+        <xs:attribute name="order" type="xs:positiveInteger" use="required" />
         <xs:attribute name="opcode" type="xs:string" use="required" />
     </xs:complexType>
 
@@ -96,11 +97,20 @@ def validate_xml(xml_string):
     return xml_doc
 
 
+def parse_esc_seqs(value):
+    if type == "string":
+        value = re.sub(r'\\(\d{3})', lambda x: chr(int(x.group(1))), value)
+    return value
+
+
 def parse_xml(filename=sys.stdin):
     # loads the XML file
     if isinstance(filename, str):
-        with open(filename, "r") as file:
-            xml_string = file.read()  # reads the file
+        try:
+            with open(filename, "r") as file:
+                xml_string = file.read()  # reads the file
+        except FileNotFoundError:
+            sys.exit(err.ERR_FILE_OPEN)  # file not found
     else:
         xml_string = filename.read()  # reads stdin
 
@@ -108,30 +118,32 @@ def parse_xml(filename=sys.stdin):
 
     dic_instruc = {}  # dictionary of instructions
     for instruc in xml_doc:  # loops through all instructions
+        if instruc.attrib["order"] in dic_instruc:
+            raise InvalidXMLStructureException(
+                "Invalid XML structure: duplicate order number.")
         args = [None] * 3
         for arg in instruc:  # loops through all arguments
-            if arg.text == "arg1":
-                args[0] = Argument(arg.attrib["type"], arg.text)
-            elif arg.text == "arg2":
+            if arg.tag == "arg1":
+                index = 0
+            elif arg.tag == "arg2":
+                index = 1
+            elif arg.tag == "arg3":
+                index = 2
+            value = arg.text
+            if arg.attrib["type"] == "string":  # parses escape sequences
+                value = re.sub(r'\\(\d{3})', lambda x: chr(
+                    int(x.group(1))), value)
+            args[index] = Argument(arg.attrib["type"], value)
+        for arg in instruc:  # checks if argument numbering is correct
+            if arg.tag == "arg2":
                 if args[0] is None:
                     raise InvalidXMLStructureException(
                         "Invalid XML structure: arg2 without arg1.")
-                args[1] = Argument(arg.attrib["type"], arg.text)
-            elif arg.text == "arg3":
+            elif arg.tag == "arg3":
                 if args[0] is None or args[1] is None:
                     raise InvalidXMLStructureException(
                         "Invalid XML structure: arg3 without arg1 or arg2.")
-                args[2] = Argument(arg.attrib["type"], arg.text)
         args = [arg for arg in args if arg is not None]  # removes None values
-        for arg in args:  # checks if argument numbering is correct
-            if arg.text == "arg2":
-                if args[0] is None:
-                    raise InvalidXMLStructureException(
-                        "Invalid XML structure: arg2 without arg1.")
-            elif arg.text == "arg3":
-                if args[0] is None or args[1] is None:
-                    raise InvalidXMLStructureException(
-                        "Invalid XML structure: arg3 without arg1 or arg2.")
         dic_instruc[instruc.attrib["order"]] = Instruction(  # creates Instruction object and adds it to dictionary
             instruc.attrib["opcode"], args)
 
@@ -149,10 +161,48 @@ def Interprate(instructions, read_from):
     labels = {}
     call_stack = Stack()
     data_stack = Stack()
+    if read_from is sys.stdin:  # checks if input is stdin
+        ExecuteInstructions(GF, TF, LF_stack, labels,
+                            call_stack, data_stack, instructions, sys.stdin)
+    else:
+        try:  # opens the file
+            with open(read_from, "r") as file:
+                ExecuteInstructions(GF, TF, LF_stack, labels,
+                                    call_stack, data_stack, instructions, file)
+        except FileNotFoundError:
+            print("File not found.", file=sys.stderr)
+            sys.exit(err.ERR_FILE_OPEN)
 
+
+def ExecuteInstructions(GF, TF, LF_stack, labels, call_stack, data_stack, instructions, read_from):
     for ins_num in range(len(instructions)):
-        ins_num, GF, TF, LF_stack, labels, call_stack, data_stack = instructions[ins_num].execute(
-            ins_num, GF, TF, LF_stack, labels, call_stack, data_stack, read_from)
+        try:
+            ins_num, GF, TF, LF_stack, labels, call_stack, data_stack = instructions[ins_num].execute(
+                ins_num, GF, TF, LF_stack, labels, call_stack, data_stack, read_from)
+        except SemanticException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_SEMANTIC_ERROR)
+        except OperandTypeException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_OPERAND_TYPE_ERROR)
+        except UndefinedVariableException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_UNDEFINED_VARIABLE)
+        except FrameNotFoundException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_FRAME_NOT_FOUND)
+        except MissingValueException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_MISSING_VALUE)
+        except InvalidOperandValueException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_INVALID_OPERAND_VALUE)
+        except StringErrorException as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_STRING_ERROR)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            sys.exit(err.ERR_INTERNAL)
 
 
 def main():
