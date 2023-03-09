@@ -1,14 +1,43 @@
 <?php
 require_once 'errorCodes.php';
 
+/**
+ * Class for storing argument types
+ * Class ArgType
+ */
 class ArgType {
+    /**
+     * Argument is variable
+     * @var int
+     */
     const VAR = 0;
+    /**
+     * Argument is symbol
+     * @var int
+     */
     const SYMB = 1;
+    /**
+     * Argument is label
+     * @var int
+     */
     const LABEL = 2;
+    /**
+     * Argument is type
+     * @var int
+     */
     const TYPE = 3;
 }
 
+/**
+ * Class for storing opcodes
+ * Class OpCode
+ */
 class OpCode {
+
+    /**
+     * Contains array of opcodes
+     * @var array
+     */
     private static $OpCodes = array (
         'MOVE',
         'CREATEFRAME',
@@ -47,15 +76,30 @@ class OpCode {
         'BREAK'
     );
 
+    /**
+     * contains opcode of instruction
+     * @var string
+     */
     private $opCode;
+
+    /**
+     * contains array of argument types
+     * @var array
+     */
     private $args;
 
+    /**
+     * Constructor for OpCode class
+     * @param $opCode opcode of instruction
+     */
     public function __construct($opCode) {
+        // check if given opcode is valid
         if (!self::IsOpCode($opCode)) {
             exit(ErrorCodes::OPCODE_ERROR);
         }
         $this->opCode = strtoupper($opCode);
 
+        // set array of argument types
         switch($this->opCode) {
             case 'MOVE':
                 $this->args = array(ArgType::VAR, ArgType::SYMB);
@@ -165,6 +209,11 @@ class OpCode {
         }
     }
 
+    /**
+     * Checks if given opcode is valid
+     * @param $opCode opcode to check
+     * @return bool true if opcode is valid, false otherwise
+     */
     public static function IsOpCode($opCode) {
         if (in_array(strtoupper($opCode), self::$OpCodes)) {
             return true;
@@ -174,10 +223,18 @@ class OpCode {
         }
     }
 
+    /**
+     * Returns opcode of instruction
+     * @return string opcode of instruction
+     */
     public function getOpCode() {
         return $this->opCode;
     }
 
+    /**
+     * Returns array of argument types of instruction
+     * @return array array of argument types
+     */
     public function getArgs() {
         return $this->args;
     }
