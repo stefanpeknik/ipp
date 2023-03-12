@@ -45,7 +45,10 @@ class Constant {
      */
     public static function IsConst($const) {
         // set up regexes for each type of constant
-        $int = '/^int@[+-]?(0x[0-9a-fA-F]+|0[0-7]*|[1-9][0-9]*)$/';
+        $decimal = '[1-9][0-9]*(_[0-9]+)*|0';
+        $hexadecimal = '0[xX][0-9a-fA-F]+(_[0-9a-fA-F]+)*';
+        $octal = '0[oO]?[0-7]+(_[0-7]+)*';
+        $int = "/^int@[+-]?(($decimal)|($hexadecimal)|($octal))$/";
         $bool = '/^bool@(true|false)$/';
         $string = '/^string@((?![\s#"\\\\]).|\\\\[0-9]{3})*$/';
         $nil = '/^nil@nil$/';
