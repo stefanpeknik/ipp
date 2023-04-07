@@ -164,6 +164,8 @@ class Instruction:
         return ins_num, GF, TF, LF_stack, labels, call_stack, data_stack
 
     def _popframe(self, ins_num: int, GF: Frame, TF: Frame, LF_stack: Stack, labels: Dict[str, int], call_stack: Stack, data_stack: Stack, read_from) -> Tuple:
+        if LF_stack.is_empty():
+            raise FrameNotFoundException("LF not defined")
         TF = LF_stack.pop()
         return ins_num, GF, TF, LF_stack, labels, call_stack, data_stack
 
@@ -209,7 +211,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -243,7 +245,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -277,7 +279,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -311,7 +313,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -347,7 +349,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -386,7 +388,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -425,7 +427,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -463,7 +465,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -497,7 +499,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -531,7 +533,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if left_type == "bool":
@@ -553,7 +555,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if left_type == "int":
@@ -578,7 +580,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -613,16 +615,19 @@ class Instruction:
             except ValueError:
                 type = "nil"
                 value = "nil"
-        elif self.args[1] == "bool":
+        elif self.args[1].value == "bool":
             type = "bool"
             if read_from.readline().lower() == "true":
                 value = "true"
             else:
                 value = "false"
-        elif self.args[1] == "string":
+        elif self.args[1].value == "string":
             type = "string"
-            value = read_from.readline()
-
+            value = read_from.readline()[:-1]
+        else:
+            raise InvalidOperandValueException(
+                "Invalid type for read: " + self.args[1].value)
+        
         GF, TF, LF_stack = self.setVar(
             self.args[0], GF, TF, LF_stack, type, value)
 
@@ -653,7 +658,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -687,7 +692,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if left_type == "string":
@@ -709,7 +714,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -745,7 +750,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -785,7 +790,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         type = "string"
@@ -815,7 +820,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -855,7 +860,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if self.isVar(self.args[2]):
@@ -895,7 +900,7 @@ class Instruction:
                 raise MissingValueException("Variable not inited")
             left_type, left_value = var.type, var.value
         else:
-            left_type, = self.args[1].type
+            left_type = self.args[1].type
             left_value = self.args[1].value
 
         if left_type != "int":

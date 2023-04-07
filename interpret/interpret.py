@@ -17,16 +17,16 @@ def parse_arguments():
         description="This script will work with the following parameters:", add_help=False)
     parser.add_argument("--help", action="help",
                         help="display this help message and exit")
-    parser.add_argument("--source", dest="source_file", metavar="file",
+    parser.add_argument("--source", dest="source_file", metavar="<file>",
                         help="input file with the XML representation of the source code")
-    parser.add_argument("--input", dest="input_file", metavar="file",
+    parser.add_argument("--input", dest="input_file", metavar="<file>",
                         help="file with inputs for the interpretation of the given source code")
     args = parser.parse_args()
 
     # checks if the parameters are valid
     if args.source_file is None and args.input_file is None:
         print("At least one of the parameters --source or --input must be specified.")
-        sys.exit(err.ERR_MISSING_PARAM)
+        sys.exit(err.ERR_MISSING_PARAM.value)
 
     return args
 
@@ -48,11 +48,11 @@ def validate_xml(xml_string):
     </xs:element>
 
     <xs:complexType name="instructionType">
-        <xs:sequence>
+        <xs:all>
         <xs:element name="arg1" minOccurs="0" type="argType" />
         <xs:element name="arg2" minOccurs="0" type="argType" />
         <xs:element name="arg3" minOccurs="0" type="argType" />
-        </xs:sequence>
+        </xs:all>
         <xs:attribute name="order" type="xs:positiveInteger" use="required" />
         <xs:attribute name="opcode" type="xs:string" use="required" />
     </xs:complexType>
@@ -110,7 +110,7 @@ def parse_xml(filename=sys.stdin):
             with open(filename, "r") as file:
                 xml_string = file.read()  # reads the file
         except FileNotFoundError:
-            sys.exit(err.ERR_FILE_OPEN)  # file not found
+            sys.exit(err.ERR_FILE_OPEN.value)  # file not found
     else:
         xml_string = filename.read()  # reads stdin
 
@@ -171,7 +171,7 @@ def Interprate(instructions, read_from):
                                     call_stack, data_stack, instructions, file)
         except FileNotFoundError:
             print("File not found.", file=sys.stderr)
-            sys.exit(err.ERR_FILE_OPEN)
+            sys.exit(err.ERR_FILE_OPEN.value)
 
 
 def ExecuteInstructions(GF, TF, LF_stack, labels, call_stack, data_stack, instructions, read_from):
@@ -181,28 +181,28 @@ def ExecuteInstructions(GF, TF, LF_stack, labels, call_stack, data_stack, instru
                 ins_num, GF, TF, LF_stack, labels, call_stack, data_stack, read_from)
         except SemanticException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_SEMANTIC_ERROR)
+            sys.exit(err.ERR_SEMANTIC_ERROR.value)
         except OperandTypeException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_OPERAND_TYPE_ERROR)
+            sys.exit(err.ERR_OPERAND_TYPE_ERROR.value)
         except UndefinedVariableException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_UNDEFINED_VARIABLE)
+            sys.exit(err.ERR_UNDEFINED_VARIABLE.value)
         except FrameNotFoundException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_FRAME_NOT_FOUND)
+            sys.exit(err.ERR_FRAME_NOT_FOUND.value)
         except MissingValueException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_MISSING_VALUE)
+            sys.exit(err.ERR_MISSING_VALUE.value)
         except InvalidOperandValueException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_INVALID_OPERAND_VALUE)
+            sys.exit(err.ERR_INVALID_OPERAND_VALUE.value)
         except StringErrorException as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_STRING_ERROR)
+            sys.exit(err.ERR_STRING_ERROR.value)
         except Exception as e:
             print(e, file=sys.stderr)
-            sys.exit(err.ERR_INTERNAL)
+            sys.exit(err.ERR_INTERNAL.value)
 
 
 def main():
@@ -210,10 +210,17 @@ def main():
     args = parse_arguments()
 
     # parses XML file
-    if args.source_file:
-        instructions = parse_xml(args.source_file)
-    else:
-        instructions = parse_xml()
+    try:
+        if args.source_file:
+            instructions = parse_xml(args.source_file)
+        else:
+            instructions = parse_xml()
+    except InvalidXMLFormatException as e:
+        print(e, file=sys.stderr)
+        sys.exit(err.ERR_INVALID_XML_FORMAT.value)
+    except InvalidXMLStructureException as e:
+        print(e, file=sys.stderr)
+        sys.exit(err.ERR_INVALID_XML_STRUCTURE.value)
 
     # sets the input source
     if args.input_file:
