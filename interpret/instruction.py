@@ -627,7 +627,7 @@ class Instruction:
         else:
             raise InvalidOperandValueException(
                 "Invalid type for read: " + self.args[1].value)
-        
+
         GF, TF, LF_stack = self.setVar(
             self.args[0], GF, TF, LF_stack, type, value)
 
