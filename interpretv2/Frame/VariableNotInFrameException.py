@@ -1,0 +1,2 @@
+class VariableNotInFrameException(Exception):
+    pass
