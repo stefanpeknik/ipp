@@ -1,21 +1,6 @@
 from lxml import etree
-import sys
 
-
-class InvalidXmlFormatException(Exception):
-    pass
-
-
-class InvalidXmlStructureException(Exception):
-    pass
-
-
-class FileNotFoundException(Exception):
-    pass
-
-
-class InvalidXMLStructureException(Exception):
-    pass
+from InstructionWork.Exceptions import InvalidXMLFormatException, InvalidXMLStructureException
 
 
 class XmlParser:
@@ -78,11 +63,11 @@ class XmlParser:
         try:
             xml_doc = etree.fromstring(xml_string.encode('utf-8'))
         except etree.XMLSyntaxError:
-            raise InvalidXmlFormatException("Invalid XML format.")
+            raise InvalidXMLFormatException("Invalid XML format.")
 
         # validate the XML document against the schema
         if not xmlschema.validate(xml_doc):
-            raise InvalidXmlStructureException("Invalid XML structure.")
+            raise InvalidXMLStructureException("Invalid XML structure.")
 
         order_nums = []  # list of order numbers
         for instruc in xml_doc:  # loops through all instructions

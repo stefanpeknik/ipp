@@ -1,26 +1,23 @@
 from Variable.Variable import Variable
-from VariableNotInFrameException import VariableNotInFrameException
+from InstructionWork.Exceptions import SemanticException, UndefinedVariableException
 
 
 class Frame:
     def __init__(self):
         self.__locals = dict()
-        self._defined = False
 
     def AddVar(self, var: Variable):
+        if self.IsVarInFrame(var.name):
+            raise SemanticException(
+                "Variable {} already defined in frame.".format(var.name))
         self.__locals[var.name] = var
 
-    def GetVarByName(self, name: str):
-        try:
-            return self.__locals[name]
-        except:
-            raise VariableNotInFrameException(
+    def GetVarByName(self, name: str) -> Variable:
+        var = self.__locals.get(name)
+        if var is None:
+            raise UndefinedVariableException(
                 "Variable {} not found in frame.".format(name))
+        return var
 
-    @property
-    def defined(self):
-        return self._defined
-
-    @defined.setter
-    def defined(self, defined: bool):
-        self._defined = defined
+    def IsVarInFrame(self, name: str):
+        return name in self.__locals

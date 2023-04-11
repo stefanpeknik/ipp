@@ -1,4 +1,4 @@
-from DataType import DataType
+from Variable.DataType import DataType
 
 
 class Value:

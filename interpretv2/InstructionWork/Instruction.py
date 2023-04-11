@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from Context import Context
+from InstructionWork.Context import Context
 
 
 @abstractmethod
@@ -8,5 +8,5 @@ class Instruction(metaclass=ABCMeta):
         self.args = args
 
     @abstractmethod
-    def execute(self, context: Context):
+    def execute(self, context: Context) -> Context:
         pass

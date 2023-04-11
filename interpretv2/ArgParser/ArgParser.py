@@ -1,5 +1,5 @@
 import argparse
-from MissingArgumentException import MissingArgumentException
+from InstructionWork.Exceptions import MissingParamException
 
 
 class ArgParser:
@@ -18,7 +18,7 @@ class ArgParser:
 
         # checks if the parameters are valid
         if args.source_file is None and args.input_file is None:
-            raise MissingArgumentException(
+            raise MissingParamException(
                 "At least one of the parameters --source or --input must be specified.")
 
         return args

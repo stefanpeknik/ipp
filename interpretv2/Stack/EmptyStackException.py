@@ -1,2 +1,0 @@
-class EmptyStackException(Exception):
-    pass

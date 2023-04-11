@@ -1,10 +1,13 @@
-from Value import Value
-from VariableNotInitedException import VariableNotInitedException
+from Variable.Value import Value
+from Variable.DataType import DataType
+
+from InstructionWork.Exceptions import MissingValueException
 
 
 class Variable:
     def __init__(self, name: str):
         self._name = name
+        self._type = None
         self._inited = False
 
     @property
@@ -12,9 +15,20 @@ class Variable:
         return self._name
 
     @property
+    def type(self) -> DataType:
+        if not self._inited:
+            raise MissingValueException(
+                "Variable {} not inited.".format(self._name))
+        return self._type
+
+    @type.setter
+    def type(self, type: DataType) -> None:
+        self._type = type
+
+    @property
     def value(self) -> Value:
         if not self._inited:
-            raise VariableNotInitedException(
+            raise MissingValueException(
                 "Variable {} not inited.".format(self._name))
         return self._value
 
@@ -26,3 +40,7 @@ class Variable:
     @property
     def inited(self) -> bool:
         return self._inited
+
+    @inited.setter
+    def inited(self, inited: bool) -> None:
+        self._inited = inited

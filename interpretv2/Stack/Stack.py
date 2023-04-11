@@ -1,4 +1,4 @@
-from EmptyStackException import EmptyStackException
+from InstructionWork.Exceptions import EmptyStackException
 
 
 class Stack:
@@ -14,7 +14,7 @@ class Stack:
         else:
             raise EmptyStackException("Cannot pop from empty stack.")
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.stack) == 0
 
     def top(self):

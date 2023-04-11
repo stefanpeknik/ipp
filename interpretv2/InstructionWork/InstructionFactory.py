@@ -1,5 +1,7 @@
-import Instruction
-from Instructions import MoveInstruction, CreateFrameInstruction, PushFrameInstruction, PopFrameInstruction, DefVarInstruction, CallInstruction, ReturnInstruction, PushsInstruction, PopsInstruction, AddInstruction, SubInstruction, MulInstruction, IdivInstruction, LtInstruction, GtInstruction, EqInstruction, AndInstruction, OrInstruction, NotInstruction, Int2CharInstruction, Stri2IntInstruction, ReadInstruction, WriteInstruction, ConcatInstruction, StrlenInstruction, GetcharInstruction, SetcharInstruction, TypeInstruction, LabelInstruction, JumpInstruction, JumpifeqInstruction, JumpifneqInstruction, ExitInstruction
+from InstructionWork.Instruction import Instruction
+from InstructionWork.Instructions import *
+
+from InstructionWork.Exceptions import InvalidXMLStructureException
 
 
 class InstructionFactory:
@@ -40,8 +42,10 @@ class InstructionFactory:
             'EXIT':        ExitInstruction
         }
 
-    def create_instruction(self, opcode: str, *args: list):
-        # it is expected that the opcode is in the dictionary as it was parser job to check that
-        instruction_class = self._op.get(opcode)
+    def create_instruction(self, opcode: str, *args: list) -> Instruction:
+        instruction_class = self._op.get(opcode.upper())
+        if instruction_class is None:
+            raise InvalidXMLStructureException(
+                "Unknown instruction opcode: " + opcode)
 
         return instruction_class(*args)
