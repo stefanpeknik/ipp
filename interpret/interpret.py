@@ -1,236 +1,117 @@
-import argparse
 import sys
-from lxml import etree
-import re
 
-from errorCodes import ErrorCodes as err
-from instruction import Instruction
-from argument import Argument
-from frame import Frame
-from stack import Stack
-from exceptions import *
+from ArgParser.ArgParser import ArgParser
+from XmlParser.XmlParser import XmlParser
+from InstructionWork.InstructionFactory import InstructionFactory
+from InstructionWork.Context import Context
+from InstructionWork.InstructionArgument import InstructionArgument
+from InstructionWork.Instructions import *
 
+from Common.ErrorHandler import ErrorHandler
 
-def parse_arguments():
-    # creates an argument parser
-    parser = argparse.ArgumentParser(
-        description="This script will work with the following parameters:", add_help=False)
-    parser.add_argument("--help", action="help",
-                        help="display this help message and exit")
-    parser.add_argument("--source", dest="source_file", metavar="<file>",
-                        help="input file with the XML representation of the source code")
-    parser.add_argument("--input", dest="input_file", metavar="<file>",
-                        help="file with inputs for the interpretation of the given source code")
-    args = parser.parse_args()
-
-    # checks if the parameters are valid
-    if args.source_file is None and args.input_file is None:
-        print("At least one of the parameters --source or --input must be specified.")
-        sys.exit(err.ERR_MISSING_PARAM.value)
-
-    return args
+from ErrorCodes import ErrorCodes as err
 
 
-def validate_xml(xml_string):
-    # creates an XML schema
-    schema_string = '''
-    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+class Interpret:
+    def run(self):
 
-    <xs:element name="program">
-        <xs:complexType>
-        <xs:sequence>
-            <xs:element name="instruction" minOccurs="0" maxOccurs="unbounded" type="instructionType" />
-        </xs:sequence>
-        <xs:attribute name="language" type="xs:string" use="required" />
-        <xs:attribute name="name" type="xs:string" use="optional" />
-        <xs:attribute name="description" type="xs:string" use="optional" />
-        </xs:complexType>
-    </xs:element>
-
-    <xs:complexType name="instructionType">
-        <xs:all>
-        <xs:element name="arg1" minOccurs="0" type="argType" />
-        <xs:element name="arg2" minOccurs="0" type="argType" />
-        <xs:element name="arg3" minOccurs="0" type="argType" />
-        </xs:all>
-        <xs:attribute name="order" type="xs:positiveInteger" use="required" />
-        <xs:attribute name="opcode" type="xs:string" use="required" />
-    </xs:complexType>
-
-    <xs:complexType name="argType">
-        <xs:simpleContent>
-        <xs:extension base="xs:string">
-            <xs:attribute name="type" use="required">
-            <xs:simpleType>
-                <xs:restriction base="xs:string">
-                <xs:enumeration value="int" />
-                <xs:enumeration value="bool" />
-                <xs:enumeration value="string" />
-                <xs:enumeration value="nil" />
-                <xs:enumeration value="label" />
-                <xs:enumeration value="type" />
-                <xs:enumeration value="var" />
-                </xs:restriction>
-            </xs:simpleType>
-            </xs:attribute>
-        </xs:extension>
-        </xs:simpleContent>
-    </xs:complexType>
-
-    </xs:schema>
-    '''
-
-    # create an XML schema object
-    xmlschema_doc = etree.fromstring(schema_string.encode('UTF-8'))
-    xmlschema = etree.XMLSchema(xmlschema_doc)
-
-    # create an XML document object
-    try:
-        xml_doc = etree.fromstring(xml_string.encode('utf-8'))
-    except etree.XMLSyntaxError:
-        raise InvalidXMLFormatException("Invalid XML format.")
-
-    # validate the XML document against the schema
-    if not xmlschema.validate(xml_doc):
-        raise InvalidXMLStructureException("Invalid XML structure.")
-
-    return xml_doc
-
-
-def parse_esc_seqs(value):
-    if type == "string":
-        value = re.sub(r'\\(\d{3})', lambda x: chr(int(x.group(1))), value)
-    return value
-
-
-def parse_xml(filename=sys.stdin):
-    # loads the XML file
-    if isinstance(filename, str):
+        # parse arguments
         try:
-            with open(filename, "r") as file:
-                xml_string = file.read()  # reads the file
-        except FileNotFoundError:
-            sys.exit(err.ERR_FILE_OPEN.value)  # file not found
-    else:
-        xml_string = filename.read()  # reads stdin
+            args = ArgParser.parse()
 
-    xml_doc = validate_xml(xml_string)  # validates the XML file
+            if args.source_file is None:
+                xml = sys.stdin.read()
+            else:
+                # read from file
+                try:
+                    xml = open(args.source_file, "r").read()
+                except FileNotFoundError as e:
+                    raise OpenFileException(
+                        "Source file {0} not found.".format(args.source_file)) from e
+            if args.input_file is None:
+                input = sys.stdin
+            else:
+                try:
+                    input = open(args.input_file, "r")
+                except FileNotFoundError as e:
+                    raise OpenFileException(
+                        "Input file {0} not found.".format(args.input_file)) from e
 
-    dic_instruc = {}  # dictionary of instructions
-    for instruc in xml_doc:  # loops through all instructions
-        if instruc.attrib["order"] in dic_instruc:
-            raise InvalidXMLStructureException(
-                "Invalid XML structure: duplicate order number.")
-        args = [None] * 3
-        for arg in instruc:  # loops through all arguments
-            if arg.tag == "arg1":
-                index = 0
-            elif arg.tag == "arg2":
-                index = 1
-            elif arg.tag == "arg3":
-                index = 2
-            value = arg.text
-            if arg.attrib["type"] == "string":  # parses escape sequences
-                value = re.sub(r'\\(\d{3})', lambda x: chr(
-                    int(x.group(1))), value)
-            args[index] = Argument(arg.attrib["type"], value)
-        for arg in instruc:  # checks if argument numbering is correct
-            if arg.tag == "arg2":
-                if args[0] is None:
+            # parse XML
+            root = XmlParser.parse_xml(xml)
+
+            # store instructions
+            instructions_dict = {}  # key: order number, value: instruction
+            for instruction in root:
+                arg1, arg2, arg3 = None, None, None
+                for arg in instruction:
+                    if arg.tag == "arg1":
+                        arg1 = InstructionArgument(
+                            arg.attrib['type'], arg.text)
+                    elif arg.tag == "arg2":
+                        arg2 = InstructionArgument(
+                            arg.attrib['type'], arg.text)
+                    elif arg.tag == "arg3":
+                        arg3 = InstructionArgument(
+                            arg.attrib['type'], arg.text)
+                args = [arg1, arg2, arg3]  # list of arguments
+                # remove None values
+                args = [arg for arg in args if arg is not None]
+                order = int(instruction.attrib["order"])
+                if order in instructions_dict:
                     raise InvalidXMLStructureException(
-                        "Invalid XML structure: arg2 without arg1.")
-            elif arg.tag == "arg3":
-                if args[0] is None or args[1] is None:
-                    raise InvalidXMLStructureException(
-                        "Invalid XML structure: arg3 without arg1 or arg2.")
-        args = [arg for arg in args if arg is not None]  # removes None values
-        dic_instruc[instruc.attrib["order"]] = Instruction(  # creates Instruction object and adds it to dictionary
-            instruc.attrib["opcode"], args)
+                        "Instruction with order number {0} already exists.".format(order))
+                instructions_dict[order] = InstructionFactory().create_instruction(
+                    instruction.attrib["opcode"].upper(), args)  # creates Instruction object and adds it to dictionary
+            instructions = [instruc for _, instruc in sorted(
+                instructions_dict.items())]
 
-    # sorts instructions by order and returns them as a list
-    instructions = [dic_instruc[key] for key in sorted(dic_instruc.keys())]
+            # create context
+            context = Context(input=input)
 
-    return instructions
+            # run interpretting
 
+            # find labels
+            for context.order in range(len(instructions)):
+                if isinstance(instructions[context.order], LabelInstruction):
+                    instructions[context.order].execute(context)
 
-def Interprate(instructions, read_from):
-    GF = Frame()
-    GF.defined = True
-    TF = Frame()
-    LF_stack = Stack()
-    labels = {}
-    call_stack = Stack()
-    data_stack = Stack()
-    if read_from is sys.stdin:  # checks if input is stdin
-        ExecuteInstructions(GF, TF, LF_stack, labels,
-                            call_stack, data_stack, instructions, sys.stdin)
-    else:
-        try:  # opens the file
-            with open(read_from, "r") as file:
-                ExecuteInstructions(GF, TF, LF_stack, labels,
-                                    call_stack, data_stack, instructions, file)
-        except FileNotFoundError:
-            print("File not found.", file=sys.stderr)
-            sys.exit(err.ERR_FILE_OPEN.value)
+            context.order = 0  # reset order
 
+            # execute instructions
+            while context.order < len(instructions):
+                # skip already executed labels
+                if not isinstance(instructions[context.order], LabelInstruction):
+                    context = instructions[context.order].execute(context)
+                context.order += 1
 
-def ExecuteInstructions(GF, TF, LF_stack, labels, call_stack, data_stack, instructions, read_from):
-    for ins_num in range(len(instructions)):
-        try:
-            ins_num, GF, TF, LF_stack, labels, call_stack, data_stack = instructions[ins_num].execute(
-                ins_num, GF, TF, LF_stack, labels, call_stack, data_stack, read_from)
+        # catch exceptions
+        except MissingParamException as e:
+            ErrorHandler.err_exit(err.ERR_MISSING_PARAM, e)
+        except InvalidXMLFormatException as e:
+            ErrorHandler.err_exit(err.ERR_INVALID_XML_FORMAT, e)
+        except InvalidXMLStructureException as e:
+            ErrorHandler.err_exit(err.ERR_INVALID_XML_STRUCTURE, e)
         except SemanticException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_SEMANTIC_ERROR.value)
+            ErrorHandler.err_exit(err.ERR_SEMANTIC_ERROR, e)
         except OperandTypeException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_OPERAND_TYPE_ERROR.value)
+            ErrorHandler.err_exit(err.ERR_OPERAND_TYPE_ERROR, e)
         except UndefinedVariableException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_UNDEFINED_VARIABLE.value)
+            ErrorHandler.err_exit(err.ERR_UNDEFINED_VARIABLE, e)
         except FrameNotFoundException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_FRAME_NOT_FOUND.value)
+            ErrorHandler.err_exit(err.ERR_FRAME_NOT_FOUND, e)
         except MissingValueException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_MISSING_VALUE.value)
+            ErrorHandler.err_exit(err.ERR_MISSING_VALUE, e)
         except InvalidOperandValueException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_INVALID_OPERAND_VALUE.value)
+            ErrorHandler.err_exit(err.ERR_INVALID_OPERAND_VALUE, e)
         except StringErrorException as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_STRING_ERROR.value)
-        except Exception as e:
-            print(e, file=sys.stderr)
-            sys.exit(err.ERR_INTERNAL.value)
-
-
-def main():
-    # parses arguments
-    args = parse_arguments()
-
-    # parses XML file
-    try:
-        if args.source_file:
-            instructions = parse_xml(args.source_file)
-        else:
-            instructions = parse_xml()
-    except InvalidXMLFormatException as e:
-        print(e, file=sys.stderr)
-        sys.exit(err.ERR_INVALID_XML_FORMAT.value)
-    except InvalidXMLStructureException as e:
-        print(e, file=sys.stderr)
-        sys.exit(err.ERR_INVALID_XML_STRUCTURE.value)
-
-    # sets the input source
-    if args.input_file:
-        read_from = args.input_file
-    else:
-        read_from = sys.stdin
-
-    # interprets the source code
-    Interprate(instructions, read_from)
+            ErrorHandler.err_exit(err.ERR_STRING_ERROR, e)
+        except InternalErrorException as e:
+            ErrorHandler.err_exit(err.ERR_INTERNAL, e)
+        finally:
+            if input != sys.stdin:  # close input file if it was opened
+                input.close()
 
 
 if __name__ == '__main__':
-    main()
+    Interpret().run()
