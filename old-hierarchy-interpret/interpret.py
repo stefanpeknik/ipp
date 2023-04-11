@@ -1,17 +1,14 @@
 import sys
-import io
 
-from ArgParser import ArgParser
-from XmlParser import XmlParser
+from ArgParser.ArgParser import ArgParser
+from XmlParser.XmlParser import XmlParser
+from InstructionWork.InstructionFactory import InstructionFactory
+from InstructionWork.Context import Context
+from InstructionWork.InstructionArgument import InstructionArgument
+from InstructionWork.Instructions import *
 
-from InstructionFactory import InstructionFactory
-from Context import Context
-from InstructionArgument import InstructionArgument
-from Instructions import *
+from Common.ErrorHandler import ErrorHandler
 
-from ErrorHandler import ErrorHandler
-
-from Exceptions import *
 from ErrorCodes import ErrorCodes as err
 
 
@@ -19,7 +16,6 @@ class Interpret:
     def run(self):
 
         # parse arguments
-        input = None
         try:
             args = ArgParser.parse()
 
@@ -113,7 +109,7 @@ class Interpret:
         except InternalErrorException as e:
             ErrorHandler.err_exit(err.ERR_INTERNAL, e)
         finally:
-            if isinstance(input, io.TextIOWrapper):  # close input file if it was opened
+            if input != sys.stdin:  # close input file if it was opened
                 input.close()
 
 
