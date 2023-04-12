@@ -7,6 +7,7 @@ class ArgParser:
     @staticmethod
     def parse() -> argparse.Namespace:
         # creates an argument parser
+        # TODO fix stuff with help when other parameters
         parser = argparse.ArgumentParser(
             description="This script will work with the following parameters:", add_help=False)
         parser.add_argument("--help", action="help",

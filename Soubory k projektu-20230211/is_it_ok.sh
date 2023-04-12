@@ -17,9 +17,9 @@
 #  2014-02-25  Pridani parametru -d open_basedir="" interpretu php
 #  2015-03-12  Pridana chybejici zavorka v popisu chyby tretiho paramatru
 #  2015-03-22  Pridana kontrola tretiho radku i v dalsich skriptech (prispela Michaela Lukasova), kontrola neexistence __MACOSX
-#  2016-03-08  Pridana kontrola ulohy CLS a odebrana uloha CST (upozornil Michal Ormoš)
+#  2016-03-08  Pridana kontrola ulohy CLS a odebrana uloha CST (upozornil Michal Ormoï¿½)
 #  2017-02-06  Zrusen pozadavek na metainformace na tretim radku skriptu, zakomentovan kontrolni kod
-#  2017-03-04  Aktualizace prikazu pro PHP 5.6 a Python 3.6 na Merlinovi (upozornil ¼uboš Hlipala)
+#  2017-03-04  Aktualizace prikazu pro PHP 5.6 a Python 3.6 na Merlinovi (upozornil ï¿½uboï¿½ Hlipala)
 #  2018-03-05  Zruseno deleni projektu na ulohy s pismennymi identifikatory, nyni 1. a 2. uloha
 #  2018-03-12  Kontrola existence prikazu dos2unix, nepovinny parametr task-num (umi kontrolovat ulohu 1 nebo 2), barevne vypisy
 #  2019-02-12  Uprava jmen a podporovanych formatu dokumentace (pdf|md)
@@ -225,7 +225,7 @@ for SCRIPT in "${REQUIRED_SCRIPTS[@]}" "${NON_REQUIRED_SCRIPTS[@]}"; do
       php8.1 $SCRIPT --help >> $LOG 2>&1
       RETCODE=$?
 	  elif [[ "$EXT" = "py" ]]; then
-      python3.8 $SCRIPT --help >> $LOG 2>&1
+      python3.10 $SCRIPT --help >> $LOG 2>&1
       RETCODE=$?		 
 	  else
       echo_color red "INTERNAL ERROR: Unknown script extension."
