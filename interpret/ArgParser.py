@@ -7,18 +7,38 @@ class ArgParser:
     @staticmethod
     def parse() -> argparse.Namespace:
         # creates an argument parser
-        # TODO fix stuff with help when other parameters
         parser = argparse.ArgumentParser(
-            description="This script will work with the following parameters:", add_help=False)
-        parser.add_argument("--help", action="help",
+            description="This script will work with the following parameters:",
+            add_help=False  # disable the default --help argument
+        )
+        # add a custom --help argument
+        parser.add_argument("--help", action="store_true",
                             help="display this help message and exit")
+
         parser.add_argument("--source", dest="source_file", metavar="<file>",
                             help="input file with the XML representation of the source code")
         parser.add_argument("--input", dest="input_file", metavar="<file>",
                             help="file with inputs for the interpretation of the given source code")
         args = parser.parse_args()
 
-        # checks if the parameters are valid
+        # checks if any unsupported argument was passed
+        supported_args = {'help', 'source_file', 'input_file'}
+        for arg in vars(args):
+            if arg not in supported_args and getattr(args, arg) is not None:
+                raise MissingParamException(f"Unsupported argument: {arg}")
+
+        # checks if --help was used together with --source or --input
+        if args.help and (args.source_file or args.input_file):
+            raise MissingParamException(
+                "The --help argument cannot be used together with --source or --input.")
+
+
+        # check if the --help argument was used
+        if args.help:
+            print(parser.format_help())
+            exit(0)
+
+        # check if the parameters are valid
         if args.source_file is None and args.input_file is None:
             raise MissingParamException(
                 "At least one of the parameters --source or --input must be specified.")
