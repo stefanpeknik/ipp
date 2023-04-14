@@ -19,19 +19,16 @@ class ArgParser:
                             help="input file with the XML representation of the source code")
         parser.add_argument("--input", dest="input_file", metavar="<file>",
                             help="file with inputs for the interpretation of the given source code")
-        args = parser.parse_args()
 
-        # checks if any unsupported argument was passed
-        supported_args = {'help', 'source_file', 'input_file'}
-        for arg in vars(args):
-            if arg not in supported_args and getattr(args, arg) is not None:
-                raise MissingParamException(f"Unsupported argument: {arg}")
+        try:  # parse the arguments
+            args = parser.parse_args()
+        except SystemExit:  # if the arguments are invalid, the parser will try to exit the program, so we catch it
+            raise MissingParamException("Invalid arguments.")
 
         # checks if --help was used together with --source or --input
         if args.help and (args.source_file or args.input_file):
             raise MissingParamException(
                 "The --help argument cannot be used together with --source or --input.")
-
 
         # check if the --help argument was used
         if args.help:
