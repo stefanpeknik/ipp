@@ -1,2 +1,0 @@
-class VariableNotInitedException(Exception):
-    pass
