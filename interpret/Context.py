@@ -19,29 +19,29 @@ class Context:
 
     def insert_var_to_frame(self, frame: str, var: Variable):
         if frame == "GF":
-            self.GF.AddVar(var)
+            self.GF.add_var(var)
         elif frame == "TF":
             if self.TF is None:
                 raise FrameNotFoundException("Frame TF not defined.")
-            self.TF.AddVar(var)
+            self.TF.add_var(var)
         elif frame == "LF":
             if self.LF_stack.is_empty():
                 raise FrameNotFoundException("Frame LF not defined.")
-            self.LF_stack.top().AddVar(var)
+            self.LF_stack.top().add_var(var)
         else:
             raise InvalidXMLStructureException("Invalid frame name.")
 
     def get_var_from_frame(self, frame: str, name: str):
         if frame == "GF":
-            return self.GF.GetVarByName(name)
+            return self.GF.get_var_by_name(name)
         elif frame == "TF":
             if self.TF is None:
                 raise FrameNotFoundException("Frame TF not defined.")
-            return self.TF.GetVarByName(name)
+            return self.TF.get_var_by_name(name)
         elif frame == "LF":
             if self.LF_stack.is_empty():
                 raise FrameNotFoundException("Frame LF not defined.")
-            return self.LF_stack.top().GetVarByName(name)
+            return self.LF_stack.top().get_var_by_name(name)
         else:
             raise InvalidXMLStructureException("Invalid frame name.")
 
@@ -49,15 +49,15 @@ class Context:
         if not self.is_frame_defined(frame):
             raise FrameNotFoundException("Frame {} not defined.".format(frame))
         if frame == "GF":
-            return self.GF.IsVarInFrame(name)
+            return self.GF.is_var_in_frame(name)
         elif frame == "TF":
             if self.TF is None:
                 raise FrameNotFoundException("Frame TF not defined.")
-            return self.TF.IsVarInFrame(name)
+            return self.TF.is_var_in_frame(name)
         elif frame == "LF":
             if self.LF_stack.is_empty():
                 raise FrameNotFoundException("Frame LF not defined.")
-            return self.LF_stack.top().IsVarInFrame(name)
+            return self.LF_stack.top().is_var_in_frame(name)
         else:
             raise InvalidXMLStructureException("Invalid frame name.")
 
