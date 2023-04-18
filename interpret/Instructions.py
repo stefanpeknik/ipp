@@ -24,7 +24,7 @@ class AddInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -39,7 +39,7 @@ class AddInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -82,7 +82,7 @@ class AndInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -97,7 +97,7 @@ class AndInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -142,13 +142,13 @@ class BreakInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 0:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         print("BREAK:", file=sys.stderr)
         print("Position in ordered instructions: {}".format(
             context.order), file=sys.stderr)
@@ -159,10 +159,10 @@ class BreakInstruction(Instruction):
         print("Data stack: {}".format(
             [(type, val) for type, val in context.data_stack.stack]), file=sys.stderr)
         print("Global frame: {}".format(
-            [(name, var.type, var.value) for name, var in context.GF.GetLocals()]), file=sys.stderr)
+            [(name, var.type, var.value) for name, var in context.GF.get_locals()]), file=sys.stderr)
         if context.TF is not None:
             print("Temporary frame: {}".format(
-                [(name, var.type, var.value) for name, var in context.TF.GetLocals()]), file=sys.stderr)  # type: ignore
+                [(name, var.type, var.value) for name, var in context.TF.get_locals()]), file=sys.stderr)  # type: ignore
         else:
             print("Temporary frame: Not defined now", file=sys.stderr)
         if context.LF_stack.is_empty():
@@ -170,7 +170,7 @@ class BreakInstruction(Instruction):
         else:
             for frame_i in range(len(context.LF_stack.stack)):
                 print("Local frame {}: {}".format(frame_i, [
-                    (name, var.type, var.value) for name, var in context.LF_stack.stack[frame_i].GetLocals()]), file=sys.stderr)
+                    (name, var.type, var.value) for name, var in context.LF_stack.stack[frame_i].get_locals()]), file=sys.stderr)
         print("--------------------------------------------------", file=sys.stderr)
 
         return context
@@ -180,7 +180,7 @@ class CallInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -189,7 +189,7 @@ class CallInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         jump_to_order = context.labels.get(self.args[0].argument_value)
         if jump_to_order is None:  # label not found
             raise SemanticException(
@@ -204,7 +204,7 @@ class ConcatInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -219,7 +219,7 @@ class ConcatInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -264,13 +264,13 @@ class CreateFrameInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 0:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         context.TF = Frame()  # type: ignore # create new TF
         return context
 
@@ -279,7 +279,7 @@ class DefVarInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -288,7 +288,7 @@ class DefVarInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         frame, name = self.args[0].argument_value.split('@')
         var = Variable(name)
         context.insert_var_to_frame(frame, var)
@@ -299,7 +299,7 @@ class DprintInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -308,7 +308,7 @@ class DprintInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         if self.args[0].argument_type == InstructionArgumentType.VAR:
             frame, name = self.args[0].argument_value.split('@')
@@ -339,7 +339,7 @@ class EqInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -354,7 +354,7 @@ class EqInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -405,7 +405,7 @@ class ExitInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -414,7 +414,7 @@ class ExitInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         if self.args[0].argument_type == InstructionArgumentType.VAR:
             frame, name = self.args[0].argument_value.split('@')
             var = context.get_var_from_frame(frame, name)
@@ -441,7 +441,7 @@ class GetcharInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -456,7 +456,7 @@ class GetcharInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get string operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -506,7 +506,7 @@ class GtInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -521,7 +521,7 @@ class GtInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -570,7 +570,7 @@ class IdivInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -585,7 +585,7 @@ class IdivInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -632,7 +632,7 @@ class Int2CharInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -644,7 +644,7 @@ class Int2CharInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -679,7 +679,7 @@ class JumpInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -688,7 +688,7 @@ class JumpInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get label
         label = self.args[0].argument_value
@@ -708,7 +708,7 @@ class JumpifeqInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -723,7 +723,7 @@ class JumpifeqInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get label
         label = self.args[0].argument_value
@@ -783,7 +783,7 @@ class JumpifneqInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -798,7 +798,7 @@ class JumpifneqInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get label
         label = self.args[0].argument_value
@@ -858,7 +858,7 @@ class LabelInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -868,7 +868,7 @@ class LabelInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # if label not in labels dict, add it and set its start pos to label's order
         if self.args[0].argument_value not in context.labels:
@@ -884,7 +884,7 @@ class LtInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -899,7 +899,7 @@ class LtInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -948,7 +948,7 @@ class MoveInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -960,7 +960,7 @@ class MoveInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         frame, name = self.args[0].argument_value.split('@')
 
@@ -983,7 +983,7 @@ class MulInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -998,7 +998,7 @@ class MulInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1041,7 +1041,7 @@ class NotInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1053,7 +1053,7 @@ class NotInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1084,7 +1084,7 @@ class OrInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1099,7 +1099,7 @@ class OrInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1144,13 +1144,13 @@ class PopFrameInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 0:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         if context.LF_stack.is_empty():  # if LF stack is empty raise exception
             raise FrameNotFoundException(
                 "LF stack is empty, cannot pop frame from it.")
@@ -1162,7 +1162,7 @@ class PopsInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1171,7 +1171,7 @@ class PopsInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         if context.data_stack.is_empty():  # if data stack is empty raise exception
             raise MissingValueException(
@@ -1193,13 +1193,13 @@ class PushFrameInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 0:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         if context.TF is None:  # if TF is None raise exception
             raise FrameNotFoundException(
@@ -1214,7 +1214,7 @@ class PushsInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1223,7 +1223,7 @@ class PushsInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         if self.args[0].argument_type == InstructionArgumentType.VAR:  # if argument is variable
             frame, name = self.args[0].argument_value.split('@')
             var = context.get_var_from_frame(
@@ -1245,7 +1245,7 @@ class ReadInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1257,7 +1257,7 @@ class ReadInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get type operand
         type = self.args[1].argument_value  # argument already dataType
@@ -1308,13 +1308,13 @@ class ReturnInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 0:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
         if context.call_stack.is_empty():  # if call stack is empty raise exception
             raise MissingValueException(
                 "Call stack is empty, cannot pop from it.")
@@ -1327,7 +1327,7 @@ class SetcharInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1342,7 +1342,7 @@ class SetcharInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get string operand
         frame_result, name_result = self.args[0].argument_value.split("@")
@@ -1402,7 +1402,7 @@ class Stri2IntInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1417,7 +1417,7 @@ class Stri2IntInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get string operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1467,7 +1467,7 @@ class StrlenInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1479,7 +1479,7 @@ class StrlenInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get string operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1510,7 +1510,7 @@ class SubInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 3:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1525,7 +1525,7 @@ class SubInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get left operand
         if self.args[1].argument_type == InstructionArgumentType.VAR:
@@ -1568,7 +1568,7 @@ class TypeInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 2:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1580,7 +1580,7 @@ class TypeInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         # get result variable
         frame_result, name_result = self.args[0].argument_value.split("@")
@@ -1607,7 +1607,7 @@ class WriteInstruction(Instruction):
     def __init__(self, args: list):
         self.args = args
 
-    def __validate_args(self):
+    def validate_args(self):
         if len(self.args) != 1:
             raise InvalidXMLStructureException(
                 "Error in instruction arguments.")
@@ -1616,7 +1616,7 @@ class WriteInstruction(Instruction):
                 "Error in instruction arguments.")
 
     def execute(self, context: Context) -> Context:
-        self.__validate_args()
+        self.validate_args()
 
         if self.args[0].argument_type == InstructionArgumentType.VAR:
             frame, name = self.args[0].argument_value.split('@')
