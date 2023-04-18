@@ -7,3 +7,26 @@ interprate
 out.xml
 xpekni01/*
 parse/xpekni01.zip
+Soubory k projektu-20230211/testdir/ArgParser.py
+Soubory k projektu-20230211/testdir/Context.py
+Soubory k projektu-20230211/testdir/DataType.py
+Soubory k projektu-20230211/testdir/ErrorCodes.py
+Soubory k projektu-20230211/testdir/ErrorHandler.py
+Soubory k projektu-20230211/testdir/Exceptions.py
+Soubory k projektu-20230211/testdir/Frame.py
+Soubory k projektu-20230211/testdir/Instruction.py
+Soubory k projektu-20230211/testdir/InstructionArgument.py
+Soubory k projektu-20230211/testdir/InstructionArgumentType.py
+Soubory k projektu-20230211/testdir/InstructionFactory.py
+Soubory k projektu-20230211/testdir/Instructions.py
+Soubory k projektu-20230211/testdir/interpret.py
+Soubory k projektu-20230211/testdir/is_it_ok.log
+Soubory k projektu-20230211/testdir/Mapper.py
+Soubory k projektu-20230211/testdir/readme2.md
+Soubory k projektu-20230211/testdir/Stack.py
+Soubory k projektu-20230211/testdir/ValueParser.py
+Soubory k projektu-20230211/testdir/Variable.py
+Soubory k projektu-20230211/testdir/XmlParser.py
+Soubory k projektu-20230211/testdir/xpekni01.zip
+Soubory k projektu-20230211/testdir/is_it_ok.log
+Soubory k projektu-20230211/testdir/is_it_ok.log
